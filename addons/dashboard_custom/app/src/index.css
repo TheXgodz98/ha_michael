@@ -8,6 +8,8 @@
   --accent-soft: #fbe7c4;
   --accent-contrast: #6b4406;
   --info: #3d7be8;
+  --cold: #3d9be8;
+  --hot: #e8703d;
   --radius: 18px;
 }
 
@@ -22,6 +24,8 @@
     --accent-soft: #4a3a17;
     --accent-contrast: #ffe9bd;
     --info: #6ea3f5;
+    --cold: #6ab3f0;
+    --hot: #f0905f;
   }
 }
 
@@ -36,10 +40,104 @@ body {
   color: var(--text);
 }
 
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
 main {
+  flex: 1;
   max-width: 520px;
   margin: 0 auto;
-  padding: 1.25rem 1rem 3rem;
+  padding: 1.25rem 1rem 5.5rem;
+  width: 100%;
+}
+
+.side-nav {
+  display: none;
+}
+
+.tab-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  background: var(--surface);
+  border-top: 0.5px solid var(--surface-muted);
+  padding: 6px 0 calc(env(safe-area-inset-bottom, 0) + 6px);
+  z-index: 10;
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.7rem;
+  padding: 4px 0;
+}
+
+.tab-item-active {
+  color: var(--accent-contrast);
+}
+
+@media (min-width: 900px) {
+  main {
+    max-width: 760px;
+    padding: 2.5rem 2.5rem 3rem;
+  }
+
+  .tab-bar {
+    display: none;
+  }
+
+  .side-nav {
+    display: flex;
+    flex-direction: column;
+    width: 220px;
+    flex-shrink: 0;
+    padding: 1.5rem 1rem;
+    gap: 6px;
+    background: var(--surface);
+    border-right: 0.5px solid var(--surface-muted);
+  }
+
+  .side-nav-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 0 0.75rem 1.5rem;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .nav-item-active {
+    background: var(--surface-muted);
+    color: var(--text);
+  }
+}
+
+@media (min-width: 1200px) {
+  main {
+    max-width: 980px;
+  }
 }
 
 .hero {
@@ -69,6 +167,20 @@ main {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+@media (min-width: 900px) {
+  .rooms {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    align-items: start;
+  }
+}
+
+@media (min-width: 1200px) {
+  .rooms {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .room-card {
@@ -256,4 +368,124 @@ main {
 
 .icon-up {
   transform: rotate(180deg);
+}
+
+.icon-down {
+  transform: rotate(0deg);
+}
+
+.empty-state {
+  color: var(--text-muted);
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.climate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+@media (min-width: 900px) {
+  .climate-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .climate-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.thermo-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--zone-color) 25%, transparent);
+  transition: box-shadow 0.4s ease;
+}
+
+.thermo-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.thermo-dial {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 4px 0;
+}
+
+.thermo-dial svg {
+  width: 100%;
+  height: 100%;
+}
+
+.thermo-arc {
+  transition: stroke-dashoffset 0.6s ease, stroke 0.4s ease;
+}
+
+.thermo-readout {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.thermo-current {
+  font-size: 1.7rem;
+  font-weight: 600;
+}
+
+.thermo-action {
+  font-size: 0.72rem;
+  color: var(--zone-color);
+  text-transform: capitalize;
+}
+
+.thermo-target {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.thermo-target button {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface-muted);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thermo-target button:active {
+  transform: scale(0.92);
+}
+
+.thermo-humidity {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
 }

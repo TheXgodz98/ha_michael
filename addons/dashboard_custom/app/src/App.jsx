@@ -1,99 +1,18 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { fetchStates, callService, subscribeLiveUpdates } from "./ha.js";
-import { ROOMS } from "./rooms.js";
+import { fetchStates, subscribeLiveUpdates } from "./ha.js";
 import Icon from "./Icon.jsx";
+import RoomsPage from "./pages/RoomsPage.jsx";
+import ClimatePage from "./pages/ClimatePage.jsx";
 
-function isLight(e) {
-  return e.entity_id.startsWith("light.");
-}
-function isCover(e) {
-  return e.entity_id.startsWith("cover.");
-}
-
-function LightTile({ entity }) {
-  const on = entity.state === "on";
-  const toggle = () =>
-    callService("light", on ? "turn_off" : "turn_on", { entity_id: entity.entity_id });
-
-  return (
-    <button className={`tile ${on ? "tile-on" : ""}`} onClick={toggle}>
-      <Icon name="bulb" className="tile-icon" />
-      <span className="tile-label">{entity.attributes.friendly_name}</span>
-      <span className="tile-state">{on ? "Acceso" : "Spento"}</span>
-    </button>
-  );
-}
-
-function CoverTile({ entity }) {
-  const position = entity.attributes.current_position ?? (entity.state === "open" ? 100 : 0);
-  const open = (e) => {
-    e.stopPropagation();
-    callService("cover", "open_cover", { entity_id: entity.entity_id });
-  };
-  const close = (e) => {
-    e.stopPropagation();
-    callService("cover", "close_cover", { entity_id: entity.entity_id });
-  };
-
-  return (
-    <div className="tile tile-cover">
-      <div className="cover-head">
-        <Icon name="blinds" className="tile-icon" />
-        <span className="tile-label">{entity.attributes.friendly_name}</span>
-      </div>
-      <div className="cover-track">
-        <div className="cover-fill" style={{ width: `${position}%` }} />
-      </div>
-      <div className="cover-actions">
-        <button onClick={open}>
-          <Icon name="chevron" size={16} className="icon-up" /> Apri
-        </button>
-        <button onClick={close}>
-          <Icon name="chevron" size={16} className="icon-down" /> Chiudi
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function RoomCard({ room, entities }) {
-  const [expanded, setExpanded] = useState(false);
-  const lights = entities.filter(isLight);
-  const covers = entities.filter(isCover);
-  const lightsOn = lights.filter((l) => l.state === "on").length;
-  const active = lightsOn > 0;
-
-  return (
-    <div className={`room-card ${active ? "room-active" : ""} ${expanded ? "room-expanded" : ""}`}>
-      <button className="room-head" onClick={() => setExpanded((v) => !v)}>
-        <div className="room-icon-wrap">
-          <Icon name={room.icon} size={22} className="room-icon" />
-        </div>
-        <div className="room-info">
-          <span className="room-name">{room.name}</span>
-          <span className="room-sub">
-            {lights.length > 0 ? `${lightsOn}/${lights.length} luci accese` : `${covers.length} tapparelle`}
-          </span>
-        </div>
-        <Icon name="chevron" className={`room-chevron ${expanded ? "rotated" : ""}`} />
-      </button>
-      <div className="room-body">
-        <div className="room-grid">
-          {lights.map((e) => (
-            <LightTile key={e.entity_id} entity={e} />
-          ))}
-          {covers.map((e) => (
-            <CoverTile key={e.entity_id} entity={e} />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+const PAGES = [
+  { id: "rooms", label: "Stanze", icon: "home" },
+  { id: "climate", label: "Clima", icon: "thermometer" },
+];
 
 export default function App() {
   const [entities, setEntities] = useState([]);
   const [now, setNow] = useState(new Date());
+  const [page, setPage] = useState("rooms");
 
   useEffect(() => {
     fetchStates().then(setEntities).catch(console.error);
@@ -118,27 +37,57 @@ export default function App() {
     return map;
   }, [entities]);
 
-  const totalLightsOn = entities.filter((e) => isLight(e) && e.state === "on").length;
+  const totalLightsOn = entities.filter(
+    (e) => e.entity_id.startsWith("light.") && e.state === "on"
+  ).length;
 
   return (
-    <main>
-      <header className="hero">
-        <span className="hero-time">
-          {now.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
-        </span>
-        <h1>Casa</h1>
-        <p className="hero-sub">
-          {totalLightsOn > 0 ? `${totalLightsOn} luci accese` : "Tutto spento"}
-        </p>
-      </header>
+    <div className="app-shell">
+      <nav className="side-nav">
+        <span className="side-nav-title">Casa</span>
+        {PAGES.map((p) => (
+          <button
+            key={p.id}
+            className={`nav-item ${page === p.id ? "nav-item-active" : ""}`}
+            onClick={() => setPage(p.id)}
+          >
+            <Icon name={p.icon} size={20} />
+            <span>{p.label}</span>
+          </button>
+        ))}
+      </nav>
 
-      <div className="rooms">
-        {ROOMS.map((room) => {
-          const entities = room.entities.map((id) => byId.get(id)).filter(Boolean);
-          if (entities.length === 0) return null;
-          return <RoomCard key={room.name} room={room} entities={entities} />;
-        })}
-      </div>
-    </main>
+      <main>
+        <header className="hero">
+          <span className="hero-time">
+            {now.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
+          </span>
+          <h1>{PAGES.find((p) => p.id === page)?.label}</h1>
+          <p className="hero-sub">
+            {page === "rooms"
+              ? totalLightsOn > 0
+                ? `${totalLightsOn} luci accese`
+                : "Tutto spento"
+              : "Stato impianto climatico"}
+          </p>
+        </header>
+
+        {page === "rooms" && <RoomsPage byId={byId} />}
+        {page === "climate" && <ClimatePage byId={byId} />}
+      </main>
+
+      <nav className="tab-bar">
+        {PAGES.map((p) => (
+          <button
+            key={p.id}
+            className={`tab-item ${page === p.id ? "tab-item-active" : ""}`}
+            onClick={() => setPage(p.id)}
+          >
+            <Icon name={p.icon} size={22} />
+            <span>{p.label}</span>
+          </button>
+        ))}
+      </nav>
+    </div>
   );
 }

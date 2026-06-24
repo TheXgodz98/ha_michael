@@ -16,6 +16,13 @@ const PATHS = {
   bulb: "M9 18h6 M10 21h4 M12 3a6 6 0 0 0-3.5 10.9c.4.3.5.7.5 1.1v0h6v0c0-.4.1-.8.5-1.1A6 6 0 0 0 12 3z",
   blinds: "M4 4h16 M4 8h16 M4 12h10 M4 16h7",
   chevron: "M6 9l6 6 6-6",
+  home: "M4 11.5 12 4l8 7.5 M6 10.5V20h12v-9.5",
+  thermometer: "M14 14.76V3.5a2 2 0 0 0-4 0v11.26a4 4 0 1 0 4 0z M12 9h0",
+  bolt: "M13 3 4 14h6l-1 7 9-11h-6z",
+  droplet: "M12 3s6 7 6 11a6 6 0 1 1-12 0c0-4 6-11 6-11z",
+  wind: "M5 8h11a3 3 0 1 0-3-3 M3 12h13a3 3 0 1 1-3 3 M5 16h8a2 2 0 1 1-2 2",
+  minus: "M5 12h14",
+  plus: "M12 5v14 M5 12h14",
 };
 
 export default function Icon({ name, size = 20, className = "" }) {
