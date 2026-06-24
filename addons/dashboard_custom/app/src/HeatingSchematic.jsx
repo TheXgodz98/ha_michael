@@ -131,14 +131,41 @@ function Manifold({ x, y, h }) {
   return <div className="pid-manifold" style={{ left: x, top: y, height: h }} />;
 }
 
-function ZoneNode({ x, y, label, active, icon }) {
+function RadiantFloorIcon() {
+  return (
+    <svg viewBox="0 0 20 20" width="14" height="14">
+      <path
+        d="M2 4h10a4 4 0 0 1 0 8H8a4 4 0 0 0 0 8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function VentIcon() {
+  return (
+    <svg viewBox="0 0 20 20" width="14" height="14">
+      <circle cx="10" cy="10" r="2" fill="currentColor" />
+      <path
+        d="M10 10c0-3 1.5-5 4-5s2.5 2 1 3.5-4 1-4 1zM10 10c3 0 5 1.5 5 4s-2 2.5-3.5 1-1-4-1-4zM10 10c0 3-1.5 5-4 5s-2.5-2-1-3.5 4-1 4-1zM10 10c-3 0-5-1.5-5-4s2-2.5 3.5-1 1 4 1 4z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function ZoneNode({ x, y, label, active, kind }) {
   return (
     <div className="pid-zone" style={{ left: x, top: y }}>
       <motion.div
         className="pid-zone-icon"
+        style={{ color: active ? "var(--accent)" : "var(--text-muted)" }}
         animate={{ boxShadow: active ? "0 0 16px -2px var(--accent)" : "0 0 0px rgba(0,0,0,0)" }}
       >
-        {icon}
+        {kind === "vmc" ? <VentIcon /> : <RadiantFloorIcon />}
       </motion.div>
       <span>{label}</span>
     </div>
@@ -211,9 +238,9 @@ export default function HeatingSchematic({ byId, config }) {
 
         {/* Branches */}
         {[
-          { key: "giorno", y: 70, label: "Giorno", icon: "G", active: giornoActive, valve: true },
-          { key: "notte", y: 160, label: "Notte", icon: "N", active: notteActive, valve: true },
-          { key: "vmc", y: 250, label: "VMC", icon: "V", active: vmcActive, valve: false },
+          { key: "giorno", y: 70, label: "Giorno", kind: "floor", active: giornoActive, valve: true },
+          { key: "notte", y: 160, label: "Notte", kind: "floor", active: notteActive, valve: true },
+          { key: "vmc", y: 250, label: "VMC", kind: "vmc", active: vmcActive, valve: false },
         ].map((b) => {
           const branch = config[b.key];
           const percent = b.valve ? num(branch.valve) ?? 0 : null;
@@ -223,7 +250,7 @@ export default function HeatingSchematic({ byId, config }) {
               <Pipe x1={580} y1={b.y + 12} x2={214} y2={b.y + 12} active={b.active} hot={false} />
               <Pump x={250} y={b.y} active={b.active} />
               {b.valve && <MixValve x={340} y={b.y} percent={percent} />}
-              <ZoneNode x={584} y={b.y - 8} label={b.label} active={b.active} icon={b.icon} />
+              <ZoneNode x={584} y={b.y - 8} label={b.label} active={b.active} kind={b.kind} />
             </React.Fragment>
           );
         })}
