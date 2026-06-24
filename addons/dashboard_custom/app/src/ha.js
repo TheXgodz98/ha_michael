@@ -14,6 +14,12 @@ export async function callService(domain, service, data) {
   return res.json();
 }
 
+export async function fetchWeather() {
+  const res = await fetch("api/weather");
+  if (!res.ok) throw new Error(`weather request failed: ${res.status}`);
+  return res.json();
+}
+
 export function subscribeLiveUpdates(onEvent) {
   const wsUrl = new URL("api/live", document.baseURI);
   wsUrl.protocol = wsUrl.protocol === "https:" ? "wss:" : "ws:";

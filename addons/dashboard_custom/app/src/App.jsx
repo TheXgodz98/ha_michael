@@ -2,20 +2,29 @@ import React, { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { fetchStates, subscribeLiveUpdates } from "./ha.js";
 import Icon from "./Icon.jsx";
+import OverviewPage from "./pages/OverviewPage.jsx";
 import RoomsPage from "./pages/RoomsPage.jsx";
 import ClimatePage from "./pages/ClimatePage.jsx";
 import HeatingPage from "./pages/HeatingPage.jsx";
 
 const PAGES = [
+  { id: "overview", label: "Home", icon: "sun" },
   { id: "rooms", label: "Stanze", icon: "home" },
   { id: "climate", label: "Clima", icon: "thermometer" },
   { id: "heating", label: "Centrale", icon: "loop" },
 ];
 
+const SUBTITLES = {
+  overview: "Riepilogo casa e meteo",
+  rooms: null,
+  climate: "Stato impianto climatico",
+  heating: "PDC, mix giorno/notte, VMC, ricircolo",
+};
+
 export default function App() {
   const [entities, setEntities] = useState([]);
   const [now, setNow] = useState(new Date());
-  const [page, setPage] = useState("rooms");
+  const [page, setPage] = useState("overview");
 
   useEffect(() => {
     fetchStates().then(setEntities).catch(console.error);
@@ -49,9 +58,7 @@ export default function App() {
       ? totalLightsOn > 0
         ? `${totalLightsOn} luci accese`
         : "Tutto spento"
-      : page === "climate"
-      ? "Stato impianto climatico"
-      : "PDC, mix giorno/notte, VMC, ricircolo";
+      : SUBTITLES[page];
 
   return (
     <div className="app-shell">
@@ -88,6 +95,7 @@ export default function App() {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
           >
+            {page === "overview" && <OverviewPage byId={byId} />}
             {page === "rooms" && <RoomsPage byId={byId} />}
             {page === "climate" && <ClimatePage byId={byId} />}
             {page === "heating" && <HeatingPage byId={byId} />}
