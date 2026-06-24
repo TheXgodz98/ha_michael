@@ -549,12 +549,15 @@ main {
 }
 
 .schematic-wrap {
-  background: linear-gradient(160deg, var(--surface-strong), var(--surface));
+  background:
+    linear-gradient(160deg, var(--surface-strong), var(--surface)),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 28px);
   border: 1px solid var(--border);
   backdrop-filter: blur(18px);
   border-radius: var(--radius);
   position: relative;
-  aspect-ratio: 340 / 230;
+  aspect-ratio: 640 / 300;
   overflow: hidden;
 }
 
@@ -563,53 +566,23 @@ main {
   top: 0;
   left: 0;
   transform-origin: top left;
+  font-family: inherit;
 }
 
-.bus-line {
+.pid-pipe {
   position: absolute;
-  width: 2px;
-  background: var(--border);
+  height: 3px;
+  border-radius: 3px;
+  transform-origin: left center;
 }
 
-.bus-connector {
+.pid-orb {
   position: absolute;
-  height: 2px;
-  background: var(--border);
-}
-
-.pdc-node {
-  position: absolute;
-  width: 70px;
-  height: 56px;
-  border-radius: 16px;
-  background: var(--surface-muted);
-  border: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-}
-
-.pdc-node span {
-  font-size: 9px;
-  color: var(--text-muted);
-  letter-spacing: 0.05em;
-}
-
-.flow-track {
-  position: absolute;
-  height: 4px;
-  border-radius: 4px;
-}
-
-.flow-orb {
-  position: absolute;
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   offset-distance: 0%;
-  animation: flow-move 1.6s linear infinite;
+  animation: flow-move 1.7s linear infinite;
   top: 0;
   left: 0;
 }
@@ -620,33 +593,104 @@ main {
   }
 }
 
-.valve-dial {
+.pid-pdc {
   position: absolute;
-  width: 34px;
-  height: 34px;
+  width: 72px;
+  height: 56px;
+  border-radius: 14px;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
 }
 
-.valve-dial-text {
+.pid-pdc-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.pid-pdc-sub {
+  font-size: 8px;
+  color: var(--text-muted);
+}
+
+.pid-pump {
   position: absolute;
-  inset: 0;
+}
+
+.pid-pump-label {
+  display: block;
+  font-size: 8px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.pid-valve {
+  position: absolute;
+}
+
+.pid-valve-text {
+  font-size: 9px;
+  fill: var(--text);
+  font-family: inherit;
+}
+
+.pid-tank {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pid-tank-label {
+  font-size: 8px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.pid-tank-value {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.pid-manifold {
+  position: absolute;
+  width: 8px;
+  border-radius: 4px;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+}
+
+.pid-zone {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.pid-zone-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 9px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text);
 }
 
-.end-node {
+.pid-inline-label {
   position: absolute;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-}
-
-.end-label {
-  position: absolute;
-  font-size: 10px;
+  font-size: 8px;
   color: var(--text-muted);
   white-space: nowrap;
 }
