@@ -1,0 +1,301 @@
+# ============================================================
+# FASE 1 — Hardening configurazione ADS (luci + tapparelle)
+# ============================================================
+# Modifiche rispetto alla configurazione attuale:
+# - Aggiunto unique_id a tutte le entità (necessario per rinominare/gestire da UI)
+# - Aggiunto device + suggested_area per raggruppamento automatico per stanza
+# - Aggiunto adsvar_set mancante sulle luci (comando, stessa variabile dello stato)
+# - Aggiunte 2 luci nuove trovate in GVL: luce_cappa, luce_cabina_armadio
+# - luce_cabina_armadio mappata come binary_sensor (comandata da sensore di
+#   presenza, sola lettura, NON comandabile da HA)
+# - Rimosso adsvar (stato) dalle tapparelle: stato_tapparella_N non è
+#   utilizzato nel programma PLC
+# - Rimosso adsvar_stop dalle tapparelle: non esiste un comando di stop reale
+#   (il PLC ferma il motore solo ridando lo stesso comando di marcia, logica
+#   che la piattaforma ads cover nativa non supporta — vedi nota in fondo)
+#
+# NOTA IMPORTANTE su luci:
+# adsvar e adsvar_set puntano alla STESSA variabile (es. fb_luce_tavolo.out_luce)
+# perché è il programma MAIN a forzare quell'output sul fronte di pressione
+# pulsante, non una logica interna del FB che la sovrascrive ciclicamente.
+# Se in futuro notassi che i comandi da HA "non tengono" (si resettano da soli
+# al ciclo successivo), è segno che il MAIN riscrive out_luce continuamente:
+# in quel caso bisognerà rivedere la logica PLC (es. introdurre un vero
+# VAR_INPUT di comando sul FB, separato dall'output di stato).
+#
+# NOTA su tapparelle:
+# Niente adsvar_stop: al momento non esiste un vero comando di stop nel PLC.
+# Le card cover in HA mostreranno solo i controlli apri/chiudi.
+
+cover:
+  - platform: ads
+    name: Tapparella Ingresso
+    unique_id: ads_tapparella_ingresso
+    adsvar_open: GVL_MQTT.rq_apri_tapparella_1
+    adsvar_close: GVL_MQTT.rq_chiudi_tapparella_1
+    device_class: curtain
+    device:
+      identifiers: ["tapparella_ingresso"]
+      name: "Tapparella Ingresso"
+      suggested_area: "Ingresso"
+
+  - platform: ads
+    name: Tapparella Divano
+    unique_id: ads_tapparella_divano
+    adsvar_open: GVL_MQTT.rq_apri_tapparella_2
+    adsvar_close: GVL_MQTT.rq_chiudi_tapparella_2
+    device_class: curtain
+    device:
+      identifiers: ["tapparella_divano"]
+      name: "Tapparella Divano"
+      suggested_area: "Soggiorno"
+
+  - platform: ads
+    name: Tapparella Tavolo
+    unique_id: ads_tapparella_tavolo
+    adsvar_open: GVL_MQTT.rq_apri_tapparella_3
+    adsvar_close: GVL_MQTT.rq_chiudi_tapparella_3
+    device_class: curtain
+    device:
+      identifiers: ["tapparella_tavolo"]
+      name: "Tapparella Tavolo"
+      suggested_area: "Soggiorno"
+
+  - platform: ads
+    name: Tapparella Cucina
+    unique_id: ads_tapparella_cucina
+    adsvar_open: GVL_MQTT.rq_apri_tapparella_4
+    adsvar_close: GVL_MQTT.rq_chiudi_tapparella_4
+    device_class: curtain
+    device:
+      identifiers: ["tapparella_cucina"]
+      name: "Tapparella Cucina"
+      suggested_area: "Cucina"
+
+  - platform: ads
+    name: Tapparella Bagno
+    unique_id: ads_tapparella_bagno
+    adsvar_open: GVL_MQTT.rq_apri_tapparella_5
+    adsvar_close: GVL_MQTT.rq_chiudi_tapparella_5
+    device_class: curtain
+    device:
+      identifiers: ["tapparella_bagno"]
+      name: "Tapparella Bagno"
+      suggested_area: "Bagno"
+
+  - platform: ads
+    name: Tapparella Cameretta
+    unique_id: ads_tapparella_cameretta
+    adsvar_open: GVL_MQTT.rq_apri_tapparella_6
+    adsvar_close: GVL_MQTT.rq_chiudi_tapparella_6
+    device_class: curtain
+    device:
+      identifiers: ["tapparella_cameretta"]
+      name: "Tapparella Cameretta"
+      suggested_area: "Cameretta"
+
+  - platform: ads
+    name: Tapparella Camera
+    unique_id: ads_tapparella_camera
+    adsvar_open: GVL_MQTT.rq_apri_tapparella_7
+    adsvar_close: GVL_MQTT.rq_chiudi_tapparella_7
+    device_class: curtain
+    device:
+      identifiers: ["tapparella_camera"]
+      name: "Tapparella Camera"
+      suggested_area: "Camera"
+
+light:
+  - platform: ads
+    name: Luce Ingresso
+    unique_id: ads_luce_ingresso
+    adsvar: MAIN_LUCE.fb_luce_ingresso.out_luce
+    adsvar_set: MAIN_LUCE.fb_luce_ingresso.out_luce
+    device:
+      identifiers: ["luce_ingresso"]
+      name: "Luce Ingresso"
+      suggested_area: "Ingresso"
+
+  - platform: ads
+    name: Luce Tavolo
+    unique_id: ads_luce_tavolo
+    adsvar: MAIN_LUCE.fb_luce_tavolo.out_luce
+    adsvar_set: MAIN_LUCE.fb_luce_tavolo.out_luce
+    device:
+      identifiers: ["luce_tavolo"]
+      name: "Luce Tavolo"
+      suggested_area: "Soggiorno"
+
+  - platform: ads
+    name: Luce Divano
+    unique_id: ads_luce_divano
+    adsvar: MAIN_LUCE.fb_luce_divano.out_luce
+    adsvar_set: MAIN_LUCE.fb_luce_divano.out_luce
+    device:
+      identifiers: ["luce_divano"]
+      name: "Luce Divano"
+      suggested_area: "Soggiorno"
+
+  - platform: ads
+    name: Luce Credenza
+    unique_id: ads_luce_credenza
+    adsvar: MAIN_LUCE.fb_luce_credenza.out_luce
+    adsvar_set: MAIN_LUCE.fb_luce_credenza.out_luce
+    device:
+      identifiers: ["luce_credenza"]
+      name: "Luce Credenza"
+      suggested_area: "Soggiorno"
+
+  - platform: ads
+    name: Luce Cucina
+    unique_id: ads_luce_cucina
+    adsvar: MAIN_LUCE.fb_luce_cucina.out_luce
+    adsvar_set: MAIN_LUCE.fb_luce_cucina.out_luce
+    device:
+      identifiers: ["luce_cucina"]
+      name: "Luce Cucina"
+      suggested_area: "Cucina"
+
+  - platform: ads
+    name: Luce Cappa
+    unique_id: ads_luce_cappa
+    adsvar: MAIN_LUCE.fb_luce_cappa.out_luce
+    adsvar_set: MAIN_LUCE.fb_luce_cappa.out_luce
+    device:
+      identifiers: ["luce_cappa"]
+      name: "Luce Cappa"
+      suggested_area: "Cucina"
+
+  - platform: ads
+    name: Luce Corridoio
+    unique_id: ads_luce_corridoio
+    adsvar: MAIN_LUCE.fb_luce_corridoio.out_luce
+    adsvar_set: MAIN_LUCE.fb_luce_corridoio.out_luce
+    device:
+      identifiers: ["luce_corridoio"]
+      name: "Luce Corridoio"
+      suggested_area: "Corridoio"
+
+  - platform: ads
+    name: Luce Soffitta
+    unique_id: ads_luce_soffitta
+    adsvar: MAIN_LUCE.fb_luce_soffitta.out_luce
+    adsvar_set: MAIN_LUCE.fb_luce_soffitta.out_luce
+    device:
+      identifiers: ["luce_soffitta"]
+      name: "Luce Soffitta"
+      suggested_area: "Soffitta"
+
+  - platform: ads
+    name: Luce Lavanderia
+    unique_id: ads_luce_lavanderia
+    adsvar: MAIN_LUCE.fb_luce_lavanderia.out_luce
+    adsvar_set: MAIN_LUCE.fb_luce_lavanderia.out_luce
+    device:
+      identifiers: ["luce_lavanderia"]
+      name: "Luce Lavanderia"
+      suggested_area: "Lavanderia"
+
+  - platform: ads
+    name: Luce Bagno
+    unique_id: ads_luce_bagno
+    adsvar: MAIN_LUCE.fb_luce_bagno.out_luce
+    adsvar_set: MAIN_LUCE.fb_luce_bagno.out_luce
+    device:
+      identifiers: ["luce_bagno"]
+      name: "Luce Bagno"
+      suggested_area: "Bagno"
+
+  - platform: ads
+    name: Luce Doccia
+    unique_id: ads_luce_doccia
+    adsvar: MAIN_LUCE.fb_luce_doccia.out_luce
+    adsvar_set: MAIN_LUCE.fb_luce_doccia.out_luce
+    device:
+      identifiers: ["luce_doccia"]
+      name: "Luce Doccia"
+      suggested_area: "Bagno"
+
+  - platform: ads
+    name: Luce Camera
+    unique_id: ads_luce_camera
+    adsvar: MAIN_LUCE.fb_luce_camera.out_luce
+    adsvar_set: MAIN_LUCE.fb_luce_camera.out_luce
+    device:
+      identifiers: ["luce_camera"]
+      name: "Luce Camera"
+      suggested_area: "Camera"
+
+  - platform: ads
+    name: Luce Bagno 2
+    unique_id: ads_luce_bagno_2
+    adsvar: MAIN_LUCE.fb_luce_bagno_2.out_luce
+    adsvar_set: MAIN_LUCE.fb_luce_bagno_2.out_luce
+    device:
+      identifiers: ["luce_bagno_2"]
+      name: "Luce Bagno 2"
+      suggested_area: "Bagno 2"
+
+  - platform: ads
+    name: Luce Cameretta
+    unique_id: ads_luce_cameretta
+    adsvar: MAIN_LUCE.fb_luce_cameretta.out_luce
+    adsvar_set: MAIN_LUCE.fb_luce_cameretta.out_luce
+    device:
+      identifiers: ["luce_cameretta"]
+      name: "Luce Cameretta"
+      suggested_area: "Cameretta"
+
+  - platform: ads
+    name: Luce Applique Sx Camera
+    unique_id: ads_luce_applique_sx_camera
+    adsvar: MAIN_LUCE.fb_luce_aplique_sx_camera.out_luce
+    adsvar_set: MAIN_LUCE.fb_luce_aplique_sx_camera.out_luce
+    device:
+      identifiers: ["luce_applique_sx_camera"]
+      name: "Luce Applique Sx Camera"
+      suggested_area: "Camera"
+
+  - platform: ads
+    name: Luce Applique Dx Camera
+    unique_id: ads_luce_applique_dx_camera
+    adsvar: MAIN_LUCE.fb_luce_aplique_dx_camera.out_luce
+    adsvar_set: MAIN_LUCE.fb_luce_aplique_dx_camera.out_luce
+    device:
+      identifiers: ["luce_applique_dx_camera"]
+      name: "Luce Applique Dx Camera"
+      suggested_area: "Camera"
+
+  - platform: ads
+    name: Luce Esterna
+    unique_id: ads_luce_esterna
+    adsvar: MAIN_LUCE.fb_luce_esterna.out_luce
+    adsvar_set: MAIN_LUCE.fb_luce_esterna.out_luce
+    device:
+      identifiers: ["luce_esterna"]
+      name: "Luce Esterna"
+      suggested_area: "Esterno"
+
+  - platform: ads
+    name: Luce Scale
+    unique_id: ads_luce_scale
+    adsvar: MAIN_LUCE.fb_luce_scale.out_luce
+    adsvar_set: MAIN_LUCE.fb_luce_scale.out_luce
+    device:
+      identifiers: ["luce_scale"]
+      name: "Luce Scale"
+      suggested_area: "Scale"
+
+# Luce cabina armadio: comandata da sensore di presenza, SOLA LETTURA.
+# Mappata come binary_sensor, non come light, per non esporre un controllo
+# che genererebbe conflitto con la logica automatica del sensore.
+binary_sensor:
+  - platform: ads
+    name: Luce Cabina Armadio
+    unique_id: ads_luce_cabina_armadio
+    adsvar: MAIN_LUCE.fb_luce_cabina_armadio.out_luce
+    device_class: light
+    device:
+      identifiers: ["luce_cabina_armadio"]
+      name: "Luce Cabina Armadio"
+      suggested_area: "Cabina Armadio"
