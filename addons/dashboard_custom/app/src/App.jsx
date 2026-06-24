@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { fetchStates, subscribeLiveUpdates } from "./ha.js";
 import Icon from "./Icon.jsx";
 import RoomsPage from "./pages/RoomsPage.jsx";
@@ -43,8 +44,19 @@ export default function App() {
     (e) => e.entity_id.startsWith("light.") && e.state === "on"
   ).length;
 
+  const subtitle =
+    page === "rooms"
+      ? totalLightsOn > 0
+        ? `${totalLightsOn} luci accese`
+        : "Tutto spento"
+      : page === "climate"
+      ? "Stato impianto climatico"
+      : "PDC, mix giorno/notte, VMC, ricircolo";
+
   return (
     <div className="app-shell">
+      <div className="ambient-glow" />
+
       <nav className="side-nav">
         <span className="side-nav-title">Casa</span>
         {PAGES.map((p) => (
@@ -65,20 +77,22 @@ export default function App() {
             {now.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
           </span>
           <h1>{PAGES.find((p) => p.id === page)?.label}</h1>
-          <p className="hero-sub">
-            {page === "rooms"
-              ? totalLightsOn > 0
-                ? `${totalLightsOn} luci accese`
-                : "Tutto spento"
-              : page === "climate"
-              ? "Stato impianto climatico"
-              : "PDC, mix giorno/notte, VMC, ricircolo"}
-          </p>
+          <p className="hero-sub">{subtitle}</p>
         </header>
 
-        {page === "rooms" && <RoomsPage byId={byId} />}
-        {page === "climate" && <ClimatePage byId={byId} />}
-        {page === "heating" && <HeatingPage byId={byId} />}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={page}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+          >
+            {page === "rooms" && <RoomsPage byId={byId} />}
+            {page === "climate" && <ClimatePage byId={byId} />}
+            {page === "heating" && <HeatingPage byId={byId} />}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       <nav className="tab-bar">
@@ -90,6 +104,7 @@ export default function App() {
           >
             <Icon name={p.icon} size={22} />
             <span>{p.label}</span>
+            {page === p.id && <motion.span layoutId="tab-dot" className="tab-dot" />}
           </button>
         ))}
       </nav>
