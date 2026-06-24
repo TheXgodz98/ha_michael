@@ -21,7 +21,7 @@ app.get("/api/weather", async (req, res) => {
   }
   const url =
     `https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_LAT}&longitude=${WEATHER_LON}` +
-    `&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m` +
+    `&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,is_day` +
     `&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=Europe/Rome`;
   try {
     const r = await fetch(url);

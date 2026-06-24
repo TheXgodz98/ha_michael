@@ -5,6 +5,7 @@ import { ROOMS } from "../rooms.js";
 import { ZONES } from "../zones.js";
 import { HEATING } from "../heating.js";
 import Icon from "../Icon.jsx";
+import HouseIllustration from "../HouseIllustration.jsx";
 
 function StatCard({ icon, label, value, sub }) {
   return (
@@ -46,21 +47,29 @@ export default function OverviewPage({ byId }) {
   const current = weather?.current;
   const today = weather?.daily;
   const desc = current ? describeWeather(current.weather_code) : null;
+  const isNight = current ? current.is_day === 0 : false;
+  const rainy = desc?.icon === "rain" || desc?.icon === "storm";
+  const snowy = desc?.icon === "snow";
 
   return (
     <div className="overview-page">
-      <div className="weather-card">
+      <div className="hero-banner">
+        <HouseIllustration
+          weatherIcon={desc?.icon ?? "clear"}
+          isNight={isNight}
+          lightsOn={lightsOn}
+          pdcActive={pdcActive}
+          rainy={rainy}
+          snowy={snowy}
+        />
         {current ? (
-          <>
-            <div className="weather-main">
-              <Icon name={desc.icon} size={42} />
-              <div>
-                <span className="weather-temp">{Math.round(current.temperature_2m)}°</span>
-                <span className="weather-desc">{desc.label}</span>
-              </div>
+          <div className="hero-weather">
+            <div className="hero-weather-main">
+              <Icon name={desc.icon} size={30} />
+              <span className="weather-temp">{Math.round(current.temperature_2m)}°</span>
             </div>
+            <span className="weather-desc">{desc.label} · Mareno di Piave</span>
             <div className="weather-meta">
-              <span>Mareno di Piave</span>
               {today && (
                 <span>
                   Min {Math.round(today.temperature_2m_min?.[0])}° · Max{" "}
@@ -70,24 +79,16 @@ export default function OverviewPage({ byId }) {
               <span>Umidità {Math.round(current.relative_humidity_2m)}%</span>
               <span>Vento {Math.round(current.wind_speed_10m)} km/h</span>
             </div>
-          </>
+          </div>
         ) : (
-          <span className="empty-state">Meteo non disponibile</span>
+          <span className="empty-state hero-weather">Meteo non disponibile</span>
         )}
       </div>
 
       <div className="stats-grid">
-        <StatCard
-          icon="bulb"
-          label="Luci accese"
-          value={`${lightsOn}/${allLightIds.length}`}
-        />
+        <StatCard icon="bulb" label="Luci accese" value={`${lightsOn}/${allLightIds.length}`} />
         <StatCard icon="blinds" label="Tapparelle" value={allCoverIds.length} sub="comando manuale" />
-        <StatCard
-          icon="thermometer"
-          label="Zone clima attive"
-          value={`${zonesActive}/${ZONES.length}`}
-        />
+        <StatCard icon="thermometer" label="Zone clima attive" value={`${zonesActive}/${ZONES.length}`} />
         <StatCard
           icon="loop"
           label="PDC"
