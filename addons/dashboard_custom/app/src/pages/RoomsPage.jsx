@@ -36,31 +36,25 @@ function LightTile({ entity }) {
 
 function CoverTile({ entity }) {
   const position = entity.attributes.current_position ?? (entity.state === "open" ? 100 : 0);
-  const open = (e) => {
-    e.stopPropagation();
-    callService("cover", "open_cover", { entity_id: entity.entity_id });
-  };
-  const close = (e) => {
-    e.stopPropagation();
-    callService("cover", "close_cover", { entity_id: entity.entity_id });
-  };
+  const open = () => callService("cover", "open_cover", { entity_id: entity.entity_id });
+  const close = () => callService("cover", "close_cover", { entity_id: entity.entity_id });
 
   return (
     <div className="tile tile-cover">
-      <div className="cover-head">
-        <Icon name="blinds" className="tile-icon" />
+      <div className="cover-blind">
+        <div className="cover-blind-shade" style={{ height: `${100 - position}%` }} />
+        <span className="cover-blind-percent">{Math.round(position)}%</span>
+      </div>
+      <div className="cover-info">
         <span className="tile-label">{cleanName(entity.attributes.friendly_name)}</span>
-      </div>
-      <div className="cover-track">
-        <div className="cover-fill" style={{ width: `${position}%` }} />
-      </div>
-      <div className="cover-actions">
-        <button onClick={open}>
-          <Icon name="chevron" size={16} className="icon-up" /> Apri
-        </button>
-        <button onClick={close}>
-          <Icon name="chevron" size={16} className="icon-down" /> Chiudi
-        </button>
+        <div className="cover-actions">
+          <button onClick={open} aria-label="Apri">
+            <Icon name="up" size={16} />
+          </button>
+          <button onClick={close} aria-label="Chiudi">
+            <Icon name="down" size={16} />
+          </button>
+        </div>
       </div>
     </div>
   );

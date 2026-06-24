@@ -14,7 +14,16 @@ export default function ClimatePage({ byId }) {
       {ZONES.map((zone) => {
         const entity = byId.get(zone.entity);
         if (!entity) return null;
-        return <Thermostat key={zone.entity} entity={entity} name={zone.name} icon={zone.icon} />;
+        const vocEntity = zone.voc ? byId.get(zone.voc) : null;
+        return (
+          <Thermostat
+            key={zone.entity}
+            entity={entity}
+            name={zone.name}
+            icon={zone.icon}
+            vocEntity={vocEntity}
+          />
+        );
       })}
     </div>
   );

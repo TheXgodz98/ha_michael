@@ -368,28 +368,48 @@ main {
 .tile-cover {
   cursor: default;
   grid-column: span 2;
-}
-
-.cover-head {
-  display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
-.cover-track {
+.cover-blind {
   position: relative;
-  height: 8px;
-  border-radius: 6px;
-  background: var(--surface);
+  width: 42px;
+  height: 66px;
+  flex-shrink: 0;
+  border-radius: 9px;
   overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
 }
 
-.cover-fill {
+.cover-blind-shade {
   position: absolute;
-  inset: 0 auto 0 0;
-  background: linear-gradient(90deg, var(--info), var(--accent-2));
-  border-radius: 6px;
-  transition: width 0.6s ease;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 35%, transparent), transparent);
+  border-bottom: 1px solid var(--border);
+  transition: height 0.6s ease;
+}
+
+.cover-blind-percent {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.cover-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
 }
 
 .cover-actions {
@@ -398,29 +418,19 @@ main {
 }
 
 .cover-actions button {
-  flex: 1;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+  color: var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 8px;
-  font-size: 0.78rem;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface);
-  color: var(--text);
 }
 
 .cover-actions button:active {
-  transform: scale(0.96);
-}
-
-.icon-up {
-  transform: rotate(180deg);
-}
-
-.icon-down {
-  transform: rotate(0deg);
+  transform: scale(0.92);
 }
 
 .empty-state {
@@ -533,13 +543,46 @@ main {
   transform: scale(0.92);
 }
 
-.thermo-humidity {
+.thermo-dial-off {
+  opacity: 0.6;
+}
+
+.thermo-modes {
+  display: flex;
+  gap: 6px;
+  margin: 4px 0 2px;
+}
+
+.thermo-mode {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 9px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.thermo-mode-active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border-color: transparent;
+  color: #1a1206;
+}
+
+.thermo-meta {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.thermo-meta-item {
   display: flex;
   align-items: center;
   gap: 4px;
   font-size: 0.75rem;
   color: var(--text-muted);
-  margin-top: 2px;
 }
 
 .heating-page {
