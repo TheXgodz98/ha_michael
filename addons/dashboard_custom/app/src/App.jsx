@@ -1,41 +1,91 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { fetchStates, callService, subscribeLiveUpdates } from "./ha.js";
+import { ROOMS } from "./rooms.js";
+import Icon from "./Icon.jsx";
 
-function isLight(entity) {
-  return entity.entity_id.startsWith("light.");
+function isLight(e) {
+  return e.entity_id.startsWith("light.");
+}
+function isCover(e) {
+  return e.entity_id.startsWith("cover.");
 }
 
-function isCover(entity) {
-  return entity.entity_id.startsWith("cover.");
-}
-
-function LightRow({ entity }) {
+function LightTile({ entity }) {
   const on = entity.state === "on";
   const toggle = () =>
-    callService("light", on ? "turn_off" : "turn_on", {
-      entity_id: entity.entity_id,
-    });
+    callService("light", on ? "turn_off" : "turn_on", { entity_id: entity.entity_id });
 
   return (
-    <div className={`row ${on ? "row-on" : ""}`} onClick={toggle}>
-      <span>{entity.attributes.friendly_name}</span>
-      <span className="state">{on ? "Acceso" : "Spento"}</span>
+    <button className={`tile ${on ? "tile-on" : ""}`} onClick={toggle}>
+      <Icon name="bulb" className="tile-icon" />
+      <span className="tile-label">{entity.attributes.friendly_name}</span>
+      <span className="tile-state">{on ? "Acceso" : "Spento"}</span>
+    </button>
+  );
+}
+
+function CoverTile({ entity }) {
+  const position = entity.attributes.current_position ?? (entity.state === "open" ? 100 : 0);
+  const open = (e) => {
+    e.stopPropagation();
+    callService("cover", "open_cover", { entity_id: entity.entity_id });
+  };
+  const close = (e) => {
+    e.stopPropagation();
+    callService("cover", "close_cover", { entity_id: entity.entity_id });
+  };
+
+  return (
+    <div className="tile tile-cover">
+      <div className="cover-head">
+        <Icon name="blinds" className="tile-icon" />
+        <span className="tile-label">{entity.attributes.friendly_name}</span>
+      </div>
+      <div className="cover-track">
+        <div className="cover-fill" style={{ width: `${position}%` }} />
+      </div>
+      <div className="cover-actions">
+        <button onClick={open}>
+          <Icon name="chevron" size={16} className="icon-up" /> Apri
+        </button>
+        <button onClick={close}>
+          <Icon name="chevron" size={16} className="icon-down" /> Chiudi
+        </button>
+      </div>
     </div>
   );
 }
 
-function CoverRow({ entity }) {
-  const open = () =>
-    callService("cover", "open_cover", { entity_id: entity.entity_id });
-  const close = () =>
-    callService("cover", "close_cover", { entity_id: entity.entity_id });
+function RoomCard({ room, entities }) {
+  const [expanded, setExpanded] = useState(false);
+  const lights = entities.filter(isLight);
+  const covers = entities.filter(isCover);
+  const lightsOn = lights.filter((l) => l.state === "on").length;
+  const active = lightsOn > 0;
 
   return (
-    <div className="row">
-      <span>{entity.attributes.friendly_name}</span>
-      <div className="actions">
-        <button onClick={open}>Apri</button>
-        <button onClick={close}>Chiudi</button>
+    <div className={`room-card ${active ? "room-active" : ""} ${expanded ? "room-expanded" : ""}`}>
+      <button className="room-head" onClick={() => setExpanded((v) => !v)}>
+        <div className="room-icon-wrap">
+          <Icon name={room.icon} size={22} className="room-icon" />
+        </div>
+        <div className="room-info">
+          <span className="room-name">{room.name}</span>
+          <span className="room-sub">
+            {lights.length > 0 ? `${lightsOn}/${lights.length} luci accese` : `${covers.length} tapparelle`}
+          </span>
+        </div>
+        <Icon name="chevron" className={`room-chevron ${expanded ? "rotated" : ""}`} />
+      </button>
+      <div className="room-body">
+        <div className="room-grid">
+          {lights.map((e) => (
+            <LightTile key={e.entity_id} entity={e} />
+          ))}
+          {covers.map((e) => (
+            <CoverTile key={e.entity_id} entity={e} />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -43,6 +93,7 @@ function CoverRow({ entity }) {
 
 export default function App() {
   const [entities, setEntities] = useState([]);
+  const [now, setNow] = useState(new Date());
 
   useEffect(() => {
     fetchStates().then(setEntities).catch(console.error);
@@ -54,27 +105,40 @@ export default function App() {
         );
       }
     });
-    return () => socket.close();
+    const clock = setInterval(() => setNow(new Date()), 30000);
+    return () => {
+      socket.close();
+      clearInterval(clock);
+    };
   }, []);
 
-  const lights = entities.filter(isLight);
-  const covers = entities.filter(isCover);
+  const byId = useMemo(() => {
+    const map = new Map();
+    entities.forEach((e) => map.set(e.entity_id, e));
+    return map;
+  }, [entities]);
+
+  const totalLightsOn = entities.filter((e) => isLight(e) && e.state === "on").length;
 
   return (
     <main>
-      <h1>Casa</h1>
-      <section>
-        <h2>Luci</h2>
-        {lights.map((e) => (
-          <LightRow key={e.entity_id} entity={e} />
-        ))}
-      </section>
-      <section>
-        <h2>Tapparelle</h2>
-        {covers.map((e) => (
-          <CoverRow key={e.entity_id} entity={e} />
-        ))}
-      </section>
+      <header className="hero">
+        <span className="hero-time">
+          {now.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
+        </span>
+        <h1>Casa</h1>
+        <p className="hero-sub">
+          {totalLightsOn > 0 ? `${totalLightsOn} luci accese` : "Tutto spento"}
+        </p>
+      </header>
+
+      <div className="rooms">
+        {ROOMS.map((room) => {
+          const entities = room.entities.map((id) => byId.get(id)).filter(Boolean);
+          if (entities.length === 0) return null;
+          return <RoomCard key={room.name} room={room} entities={entities} />;
+        })}
+      </div>
     </main>
   );
 }
