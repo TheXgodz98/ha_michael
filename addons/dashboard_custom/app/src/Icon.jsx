@@ -23,6 +23,8 @@ const PATHS = {
   wind: "M5 8h11a3 3 0 1 0-3-3 M3 12h13a3 3 0 1 1-3 3 M5 16h8a2 2 0 1 1-2 2",
   minus: "M5 12h14",
   plus: "M12 5v14 M5 12h14",
+  loop: "M4 4v5h5 M4 9a8 8 0 0 1 14-5l2 2 M20 20v-5h-5 M20 15a8 8 0 0 1-14 5l-2-2",
+  fan: "M12 12a2 2 0 1 0 0-4 M12 8c0-3 1.5-5 4-5s3 2 1 4-5 1-5 1z M16 12c3 0 5 1.5 5 4s-2 3-4 1-1-5-1-5z M12 16c0 3-1.5 5-4 5s-3-2-1-4 5-1 5-1z M8 12c-3 0-5-1.5-5-4s2-3 4-1 1 5 1 5z",
 };
 
 export default function Icon({ name, size = 20, className = "" }) {

@@ -3,10 +3,12 @@ import { fetchStates, subscribeLiveUpdates } from "./ha.js";
 import Icon from "./Icon.jsx";
 import RoomsPage from "./pages/RoomsPage.jsx";
 import ClimatePage from "./pages/ClimatePage.jsx";
+import HeatingPage from "./pages/HeatingPage.jsx";
 
 const PAGES = [
   { id: "rooms", label: "Stanze", icon: "home" },
   { id: "climate", label: "Clima", icon: "thermometer" },
+  { id: "heating", label: "Centrale", icon: "loop" },
 ];
 
 export default function App() {
@@ -68,12 +70,15 @@ export default function App() {
               ? totalLightsOn > 0
                 ? `${totalLightsOn} luci accese`
                 : "Tutto spento"
-              : "Stato impianto climatico"}
+              : page === "climate"
+              ? "Stato impianto climatico"
+              : "PDC, mix giorno/notte, VMC, ricircolo"}
           </p>
         </header>
 
         {page === "rooms" && <RoomsPage byId={byId} />}
         {page === "climate" && <ClimatePage byId={byId} />}
+        {page === "heating" && <HeatingPage byId={byId} />}
       </main>
 
       <nav className="tab-bar">

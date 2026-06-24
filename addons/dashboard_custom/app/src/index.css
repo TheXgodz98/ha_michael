@@ -489,3 +489,203 @@ main {
   color: var(--text-muted);
   margin-top: 2px;
 }
+
+.heating-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.schematic-wrap {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+
+.schematic-svg {
+  width: 100%;
+  height: auto;
+}
+
+.schematic-label {
+  font-size: 9px;
+  fill: var(--text-muted);
+  font-family: inherit;
+}
+
+.schematic-label-small {
+  font-size: 8px;
+}
+
+.schematic-valve-text {
+  font-size: 9px;
+  fill: var(--text);
+  font-family: inherit;
+}
+
+@keyframes pipe-dash-fwd {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+@keyframes pipe-dash-rev {
+  to {
+    stroke-dashoffset: 24;
+  }
+}
+
+.pipe-flow-fwd {
+  animation: pipe-dash-fwd 0.8s linear infinite;
+}
+
+.pipe-flow-rev {
+  animation: pipe-dash-rev 0.8s linear infinite;
+}
+
+@keyframes fan-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pdc-fan-spin {
+  animation: fan-spin 1.6s linear infinite;
+  transform-origin: 55px 120px;
+}
+
+.valve-arc {
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+.panels-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+@media (min-width: 700px) {
+  .panels-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.panel {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+
+.panel h3 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0 0 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.panel-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 0.5px solid var(--surface-muted);
+}
+
+.panel-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+}
+
+.field-row-wrap {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  color: var(--text-muted);
+}
+
+.field-value {
+  font-weight: 500;
+  min-width: 48px;
+  text-align: center;
+}
+
+.field-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.field-stepper button {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface-muted);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.field-switch {
+  width: 40px;
+  height: 24px;
+  border-radius: 14px;
+  border: none;
+  background: var(--surface-muted);
+  position: relative;
+  transition: background 0.3s ease;
+}
+
+.field-switch-on {
+  background: var(--accent);
+}
+
+.field-switch-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--surface);
+  transition: transform 0.3s ease;
+}
+
+.field-switch-on .field-switch-knob {
+  transform: translateX(16px);
+}
+
+.field-options {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.field-option {
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: none;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.field-option-active {
+  background: var(--accent-soft);
+  color: var(--accent-contrast);
+}
