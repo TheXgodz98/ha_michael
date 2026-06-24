@@ -35,26 +35,43 @@ function LightTile({ entity }) {
 }
 
 function CoverTile({ entity }) {
-  const position = entity.attributes.current_position ?? (entity.state === "open" ? 100 : 0);
-  const open = () => callService("cover", "open_cover", { entity_id: entity.entity_id });
-  const close = () => callService("cover", "close_cover", { entity_id: entity.entity_id });
+  const [lastAction, setLastAction] = useState(null);
+
+  const open = () => {
+    setLastAction("open");
+    callService("cover", "open_cover", { entity_id: entity.entity_id });
+  };
+  const close = () => {
+    setLastAction("close");
+    callService("cover", "close_cover", { entity_id: entity.entity_id });
+  };
 
   return (
     <div className="tile tile-cover">
-      <div className="cover-blind">
-        <div className="cover-blind-shade" style={{ height: `${100 - position}%` }} />
-        <span className="cover-blind-percent">{Math.round(position)}%</span>
+      <div className="cover-icon-wrap">
+        <Icon name="blinds" className="tile-icon" />
       </div>
       <div className="cover-info">
         <span className="tile-label">{cleanName(entity.attributes.friendly_name)}</span>
-        <div className="cover-actions">
-          <button onClick={open} aria-label="Apri">
-            <Icon name="up" size={16} />
-          </button>
-          <button onClick={close} aria-label="Chiudi">
-            <Icon name="down" size={16} />
-          </button>
-        </div>
+        <span className="tile-state">
+          {lastAction === "open" ? "Ultimo comando: apri" : lastAction === "close" ? "Ultimo comando: chiudi" : "Nessuna posizione (manuale)"}
+        </span>
+      </div>
+      <div className="cover-actions">
+        <button
+          className={lastAction === "open" ? "cover-btn-active" : ""}
+          onClick={open}
+          aria-label="Apri"
+        >
+          <Icon name="up" size={16} />
+        </button>
+        <button
+          className={lastAction === "close" ? "cover-btn-active" : ""}
+          onClick={close}
+          aria-label="Chiudi"
+        >
+          <Icon name="down" size={16} />
+        </button>
       </div>
     </div>
   );

@@ -373,34 +373,16 @@ main {
   gap: 12px;
 }
 
-.cover-blind {
-  position: relative;
-  width: 42px;
-  height: 66px;
+.cover-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
   flex-shrink: 0;
-  border-radius: 9px;
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: var(--surface);
   border: 1px solid var(--border);
-}
-
-.cover-blind-shade {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 35%, transparent), transparent);
-  border-bottom: 1px solid var(--border);
-  transition: height 0.6s ease;
-}
-
-.cover-blind-percent {
-  position: absolute;
-  bottom: 4px;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 9px;
   color: var(--text-muted);
 }
 
@@ -431,6 +413,12 @@ main {
 
 .cover-actions button:active {
   transform: scale(0.92);
+}
+
+.cover-btn-active {
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  color: var(--accent-contrast);
 }
 
 .empty-state {
