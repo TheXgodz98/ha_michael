@@ -1,5 +1,5 @@
 name: "Dashboard Custom"
-version: "0.6.1"
+version: "0.6.2"
 slug: "dashboard_custom"
 description: "Webapp custom per il controllo casa (luci, tapparelle, ecc.), indipendente dal ciclo di aggiornamento di HAOS"
 arch:

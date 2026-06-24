@@ -131,6 +131,15 @@ function Manifold({ x, y, h }) {
   return <div className="pid-manifold" style={{ left: x, top: y, height: h }} />;
 }
 
+function TempTag({ x, y, value, hot }) {
+  if (value == null || Number.isNaN(value)) return null;
+  return (
+    <span className="pid-temp" style={{ left: x, top: y, color: hot ? "var(--hot)" : "var(--cold)" }}>
+      {value.toFixed(1)}°
+    </span>
+  );
+}
+
 function RadiantFloorIcon() {
   return (
     <svg viewBox="0 0 20 20" width="14" height="14">
@@ -188,6 +197,9 @@ export default function HeatingSchematic({ byId, config }) {
 
   const acsTemp = num(config.pdc.acs);
   const esternaTemp = num(config.pdc.esterna);
+  const pdcMandata = num(config.pdc.mandata);
+  const pdcRitorno = num(config.pdc.ritorno);
+  const ricircoloTemp = num(config.ricircolo.temp);
 
   return (
     <div className="schematic-wrap" ref={ref}>
@@ -225,11 +237,14 @@ export default function HeatingSchematic({ byId, config }) {
         <span className="pid-inline-label" style={{ left: 176, top: 100 }}>
           Ricircolo
         </span>
+        <TempTag x={200} y={68} value={ricircoloTemp} hot={false} />
 
         {/* PDC -> Compensatore */}
         <Pipe x1={88} y1={148} x2={118} y2={148} active={pdcActive} hot />
         <Pipe x1={118} y1={172} x2={88} y2={172} active={pdcActive} hot={false} />
         <Tank x={118} y={140} w={36} h={86} label="Compens." value={null} unit="" hot />
+        <TempTag x={92} y={134} value={pdcMandata} hot />
+        <TempTag x={92} y={177} value={pdcRitorno} hot={false} />
 
         {/* Compensatore -> manifold */}
         <Pipe x1={154} y1={150} x2={206} y2={150} active={pdcActive} hot />
@@ -244,12 +259,16 @@ export default function HeatingSchematic({ byId, config }) {
         ].map((b) => {
           const branch = config[b.key];
           const percent = b.valve ? num(branch.valve) ?? 0 : null;
+          const mandata = num(branch.mandata);
+          const ritorno = num(branch.ritorno);
           return (
             <React.Fragment key={b.key}>
               <Pipe x1={214} y1={b.y} x2={580} y2={b.y} active={b.active} hot />
               <Pipe x1={580} y1={b.y + 12} x2={214} y2={b.y + 12} active={b.active} hot={false} />
               <Pump x={250} y={b.y} active={b.active} />
               {b.valve && <MixValve x={340} y={b.y} percent={percent} />}
+              <TempTag x={460} y={b.y - 13} value={mandata} hot />
+              <TempTag x={460} y={b.y + 17} value={ritorno} hot={false} />
               <ZoneNode x={584} y={b.y - 8} label={b.label} active={b.active} kind={b.kind} />
             </React.Fragment>
           );

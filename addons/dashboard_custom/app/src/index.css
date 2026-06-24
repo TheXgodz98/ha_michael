@@ -695,6 +695,13 @@ main {
   white-space: nowrap;
 }
 
+.pid-temp {
+  position: absolute;
+  font-size: 9px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .panels-grid {
   display: grid;
   grid-template-columns: 1fr;
