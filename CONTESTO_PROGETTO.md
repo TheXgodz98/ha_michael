@@ -66,6 +66,13 @@ energia, qualità aria.
 - **Fase 4 (da fare, solo a dashboard stabile)**: migrare il ramo MQTT
   (clima/energia/PDC/IAQ) su variabili ADS native nel PLC, aggiornando GVL
   TwinCAT e configurazione HA in parallelo.
+- **Fase 3 bis (in corso)**: in alternativa/aggiunta a Lovelace, webapp
+  custom (React) installata come **add-on custom di Home Assistant OS**
+  (cartella `addons/dashboard_custom/`), per avere libertà grafica totale
+  e indipendenza dagli aggiornamenti di HAOS/Supervisor (il backend Node
+  fa da proxy verso le API di HA tramite `SUPERVISOR_TOKEN`, il token non
+  arriva mai al browser). Repo aggiungibile come "custom repository" da
+  Add-on store grazie a `repository.yaml` in root.
 
 ## File già pronto da integrare
 Il file `fase1_ads_luci_tapparelle.yaml` (incluso in questa cartella)
