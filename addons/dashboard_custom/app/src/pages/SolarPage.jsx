@@ -149,9 +149,15 @@ export default function SolarPage() {
       </div>
 
       <p className="solar-note">
-        Lettura via Modbus TCP da {data.host} (unit id {data.unitId}, entrambi auto-rilevati) — mappa registri
-        SPH hybrid non ancora verificata sul tuo modello reale: controlla che SOC, potenze e tensioni
-        abbiano senso. Stato inverter: {data.status}, frequenza rete: {data.gridFreqHz?.toFixed(2)} Hz.
+        {data.source === "cloud" ? (
+          <>Dati dal cloud Growatt (Modbus locale non raggiungibile) — fallback automatico attivo.</>
+        ) : (
+          <>
+            Lettura via Modbus TCP da {data.host} (unit id {data.unitId}, entrambi auto-rilevati) — mappa
+            registri SPH hybrid non ancora verificata sul tuo modello reale. Stato inverter: {data.status},
+            frequenza rete: {data.gridFreqHz?.toFixed(2)} Hz.
+          </>
+        )}
       </p>
     </div>
   );
