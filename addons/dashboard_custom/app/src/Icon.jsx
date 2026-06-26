@@ -38,6 +38,7 @@ const PATHS = {
   panel: "M3 8 5 4h14l2 4z M3 8h18l-2 12H5z M3 8l9 4 9-4 M12 12v8 M7 8l-1.5 12 M17 8l1.5 12",
   arrowRight: "M5 12h14 M13 6l6 6-6 6",
   grid: "M4 4h7v7H4z M13 4h7v7h-7z M4 13h7v7H4z M13 13h7v7h-7z",
+  battery: "M3 7h16v10H3z M19 10h2v4h-2z M7 10v4 M11 10v4",
 };
 
 export default function Icon({ name, size = 20, className = "" }) {

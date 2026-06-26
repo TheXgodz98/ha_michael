@@ -27,6 +27,11 @@ export default function SolarPage() {
   }
 
   const producing = data.pvPowerW > 20;
+  const battery = data.storage;
+  const batteryFlowingOut = battery && battery.batteryDischargeW > 20;
+  const batteryFlowingIn = battery && battery.batteryChargeW > 20;
+  const exportingToGrid = battery && battery.gridExportW > 20;
+  const importingFromGrid = battery && battery.gridImportW > 20;
 
   return (
     <div className="solar-page">
@@ -46,8 +51,37 @@ export default function SolarPage() {
           <div className="solar-flow-node">
             <Icon name="home" size={22} />
           </div>
+          {battery && (
+            <>
+              <Icon
+                name="arrowRight"
+                size={18}
+                className={exportingToGrid || importingFromGrid ? "solar-flow-arrow-active" : "solar-flow-arrow"}
+              />
+              <div className="solar-flow-node">
+                <Icon name="grid" size={22} />
+              </div>
+            </>
+          )}
         </div>
       </div>
+
+      {battery && (
+        <div className="solar-hero solar-battery">
+          <div className="solar-battery-head">
+            <Icon name="battery" size={20} />
+            <span>Batteria</span>
+          </div>
+          <span className="solar-hero-value solar-battery-value">{Math.round(battery.socPercent ?? 0)}%</span>
+          <span className="solar-flow-arrow" style={{ fontSize: "0.78rem" }}>
+            {batteryFlowingOut
+              ? `In scarica · ${(battery.batteryDischargeW / 1000).toFixed(2)} kW`
+              : batteryFlowingIn
+              ? `In carica · ${(battery.batteryChargeW / 1000).toFixed(2)} kW`
+              : "In riposo"}
+          </span>
+        </div>
+      )}
 
       <div className="stats-grid">
         <div className="stat-card">
@@ -88,11 +122,36 @@ export default function SolarPage() {
             <span className="stat-sub">{data.pv2CurrentA?.toFixed(1)} A</span>
           </div>
         </div>
+        {battery && (
+          <>
+            <div className="stat-card">
+              <div className="stat-icon">
+                <Icon name="home" size={18} />
+              </div>
+              <div className="stat-body">
+                <span className="stat-value">{(battery.loadConsumptionW / 1000).toFixed(2)} kW</span>
+                <span className="stat-label">Consumo casa</span>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon">
+                <Icon name="grid" size={18} />
+              </div>
+              <div className="stat-body">
+                <span className="stat-value">
+                  {((battery.gridExportW - battery.gridImportW) / 1000).toFixed(2)} kW
+                </span>
+                <span className="stat-label">{exportingToGrid ? "Verso rete" : "Da rete"}</span>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       <p className="solar-note">
-        Lettura via Modbus TCP dallo ShineMaster — mappa registri standard Growatt, da verificare con i
-        valori reali (stato inverter: {data.status}, frequenza rete: {data.gridFreqHz?.toFixed(2)} Hz).
+        Lettura via Modbus TCP dallo ShineMaster (unit id {data.unitId}, auto-rilevato) — mappa registri
+        SPH hybrid non ancora verificata sul tuo modello reale: controlla che SOC, potenze e tensioni
+        abbiano senso. Stato inverter: {data.status}, frequenza rete: {data.gridFreqHz?.toFixed(2)} Hz.
       </p>
     </div>
   );
