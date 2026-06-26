@@ -1,52 +1,73 @@
 import ModbusRTU from "modbus-serial";
+import { readFileSync } from "fs";
 
-// ShineMaster Modbus TCP gateway, inverter is a Growatt SPH10000TL3 BH-UP
-// (three-phase hybrid with battery).
-const HOST = "192.168.1.120";
-const PORT = 502;
-const CANDIDATE_UNIT_IDS = [1, 2, 3, 4, 5, 100, 101];
+const UNIT_ID_CANDIDATES = [1, 2, 3, 4, 5, 100, 101];
 
-let client = null;
-let discoveredUnitId = null;
-let cache = { data: null, fetchedAt: 0 };
-
-async function connect() {
-  if (client && client.isOpen) return client;
-  client = new ModbusRTU();
-  await client.connectTCP(HOST, { port: PORT });
-  client.setTimeout(3000);
-  return client;
+function loadOptions() {
+  try {
+    const raw = readFileSync("/data/options.json", "utf-8");
+    const opts = JSON.parse(raw);
+    return {
+      hosts: opts.growatt_hosts?.length ? opts.growatt_hosts : ["192.168.1.3", "192.168.1.8"],
+      port: opts.growatt_port || 502,
+    };
+  } catch {
+    return { hosts: ["192.168.1.3", "192.168.1.8"], port: 502 };
+  }
 }
 
-// The slave address of the inverter behind the ShineMaster isn't known yet,
-// so probe a handful of common addresses and keep the first one that
-// answers with a non-empty register block.
-async function resolveUnitId(c) {
-  if (discoveredUnitId != null) {
-    c.setID(discoveredUnitId);
-    return discoveredUnitId;
+let client = null;
+let working = null; // { host, port, unitId }
+let cache = { data: null, fetchedAt: 0 };
+
+async function tryConnect(host, port) {
+  const c = new ModbusRTU();
+  await c.connectTCP(host, { port });
+  c.setTimeout(3000);
+  return c;
+}
+
+// Neither the ShineMaster's LAN IP nor the inverter's Modbus slave address
+// were known with certainty, so probe every host/unit-id combination and
+// keep the first one that answers with a non-empty register block.
+async function resolveConnection() {
+  if (working && client && client.isOpen) {
+    client.setID(working.unitId);
+    return client;
   }
-  for (const id of CANDIDATE_UNIT_IDS) {
+
+  const { hosts, port } = loadOptions();
+  for (const host of hosts) {
+    let c;
     try {
-      c.setID(id);
-      const r = await c.readInputRegisters(0, 10);
-      if (r.data.some((v) => v !== 0)) {
-        discoveredUnitId = id;
-        return id;
-      }
+      c = await tryConnect(host, port);
     } catch {
-      // try next candidate
+      continue;
     }
+    for (const unitId of UNIT_ID_CANDIDATES) {
+      try {
+        c.setID(unitId);
+        const r = await c.readInputRegisters(0, 10);
+        if (r.data.some((v) => v !== 0)) {
+          working = { host, port, unitId };
+          client = c;
+          return c;
+        }
+      } catch {
+        // try next unit id
+      }
+    }
+    c.close?.();
   }
-  throw new Error("no responding Modbus unit id found among candidates");
+  throw new Error(
+    `no Growatt inverter responded on hosts [${hosts.join(", ")}] port ${port}`
+  );
 }
 
 function combine32(hi, lo) {
   return (hi << 16) | lo;
 }
 
-// Base PV/inverter block: consistent across most Growatt models including
-// SPH hybrids (Growatt Modbus RTU Protocol v1.20/1.24).
 function parseBaseBlock(d) {
   return {
     status: d[0],
@@ -64,11 +85,9 @@ function parseBaseBlock(d) {
   };
 }
 
-// Storage/battery block for SPH hybrid inverters starts around register
-// 1000 (Growatt "Storage" Modbus protocol). Offsets below are the commonly
-// documented ones but UNVERIFIED against this specific unit - sanity-check
-// against the raw arrays once live (SOC should read 0-100, powers should be
-// plausible Watt values).
+// Storage/battery block for SPH hybrid inverters, offsets documented
+// commonly for the Growatt "Storage" Modbus protocol but unverified against
+// this specific SPH10000TL3 unit - sanity-check against raw values once live.
 function parseStorageBlock(s) {
   const at = (reg) => s[reg - 1000];
   return {
@@ -86,8 +105,7 @@ export async function readGrowattSnapshot({ skipCache = false } = {}) {
     return cache.data;
   }
 
-  const c = await connect();
-  const unitId = await resolveUnitId(c);
+  const c = await resolveConnection();
 
   const base = await c.readInputRegisters(0, 70);
   let storage = null;
@@ -98,7 +116,8 @@ export async function readGrowattSnapshot({ skipCache = false } = {}) {
   }
 
   const data = {
-    unitId,
+    host: working.host,
+    unitId: working.unitId,
     ...parseBaseBlock(base.data),
     storage: storage ? parseStorageBlock(storage.data) : null,
     raw: base.data,
@@ -111,5 +130,5 @@ export async function readGrowattSnapshot({ skipCache = false } = {}) {
 
 export function invalidateGrowattConnection() {
   client = null;
-  discoveredUnitId = null;
+  working = null;
 }
