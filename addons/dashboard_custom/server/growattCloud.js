@@ -1,10 +1,9 @@
 import { createHash } from "crypto";
 import { readFileSync } from "fs";
 
-// Growatt runs region-specific servers; an EU-registered account often
-// doesn't exist on the global/China default and login fails with a
-// generic "Username or Password Error" even with correct credentials.
-const BASE_CANDIDATES = ["https://server.growatt.com", "https://server-eu.growatt.com"];
+// Confirmed by the user: the account logs in fine on server.growatt.com
+// via browser, so that's the only real candidate.
+const BASE_CANDIDATES = ["https://server.growatt.com"];
 
 function loadCredentials() {
   try {
@@ -33,13 +32,32 @@ function hashPassword(value) {
 
 let session = null; // { base, cookie, plantId, mixSn }
 
+const BROWSER_HEADERS = (base, cookie) => ({
+  "User-Agent":
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+  Accept: "application/json, text/javascript, */*; q=0.01",
+  Origin: base,
+  Referer: `${base}/login`,
+  "X-Requested-With": "XMLHttpRequest",
+  ...(cookie ? { Cookie: cookie } : {}),
+});
+
+// Fetches the login page first to pick up whatever session cookie the
+// server hands out before it will accept a POST /login - some backends
+// reject "cookie-less" login attempts with a generic credentials error
+// instead of a clearer security message.
+async function primeSession(base) {
+  const r = await fetch(`${base}/login`, { headers: BROWSER_HEADERS(base) });
+  const setCookie = r.headers.getSetCookie?.() ?? [];
+  return setCookie.map((c) => c.split(";")[0]).join("; ");
+}
+
 async function post(base, path, body, cookie) {
   const r = await fetch(`${base}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-      ...(cookie ? { Cookie: cookie } : {}),
+      ...BROWSER_HEADERS(base, cookie),
     },
     body: new URLSearchParams(body),
   });
@@ -60,14 +78,22 @@ async function login() {
   const attempts = [];
   for (const base of BASE_CANDIDATES) {
     try {
-      const { json, setCookie } = await post(base, "/login", {
-        account: username,
-        password: hashPassword(password),
-        validateCode: "",
-        is_local: "true",
-      });
+      const primedCookie = await primeSession(base).catch(() => "");
+      const { json, setCookie } = await post(
+        base,
+        "/login",
+        {
+          account: username,
+          userName: username,
+          password: hashPassword(password),
+          validateCode: "",
+          is_local: "true",
+        },
+        primedCookie
+      );
       if (json.result === 1) {
-        const cookie = setCookie.map((c) => c.split(";")[0]).join("; ");
+        const cookie =
+          [primedCookie, setCookie.map((c) => c.split(";")[0]).join("; ")].filter(Boolean).join("; ");
 
         const plants = await post(base, "/index/getPlantListTitle", {}, cookie);
         const plantId = plants.json?.[0]?.id ?? plants.json?.[0]?.plantId;
