@@ -12,8 +12,17 @@ function loadCredentials() {
   }
 }
 
-function md5(value) {
-  return createHash("md5").update(value).digest("hex");
+// Growatt's login doesn't use a plain MD5 hash: every hex-pair (byte) whose
+// first nibble is "0" gets that nibble replaced with "c" - a long-standing
+// quirk inherited from the original Java client, also implemented this way
+// in the community growattServer project.
+function hashPassword(value) {
+  const plain = createHash("md5").update(value).digest("hex");
+  let out = "";
+  for (let i = 0; i < plain.length; i += 2) {
+    out += plain[i] === "0" ? "c" + plain[i + 1] : plain.slice(i, i + 2);
+  }
+  return out;
 }
 
 let session = null; // { cookie, plantId, mixSn }
@@ -42,7 +51,7 @@ async function login() {
   }
   const { json, setCookie } = await post("/login", {
     account: username,
-    password: md5(password),
+    password: hashPassword(password),
     validateCode: "",
     is_local: "true",
   });
