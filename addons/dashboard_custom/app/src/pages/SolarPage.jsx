@@ -2,6 +2,26 @@ import React, { useEffect, useState } from "react";
 import { fetchGrowatt } from "../ha.js";
 import Icon from "../Icon.jsx";
 
+function DebugPanel({ data }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="solar-debug">
+      <button className="solar-debug-toggle" onClick={() => setOpen((v) => !v)}>
+        {open ? "Nascondi dati grezzi" : "Mostra dati grezzi (debug)"}
+      </button>
+      {open && (
+        <pre className="solar-debug-pre">
+          {JSON.stringify(
+            { rawStatus: data.rawStatus, rawTotal: data.rawTotal, raw: data.raw, rawStorage: data.rawStorage },
+            null,
+            2
+          )}
+        </pre>
+      )}
+    </div>
+  );
+}
+
 export default function SolarPage() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
@@ -159,6 +179,8 @@ export default function SolarPage() {
           </>
         )}
       </p>
+
+      <DebugPanel data={data} />
     </div>
   );
 }
