@@ -59,27 +59,31 @@ async function login() {
 
   const attempts = [];
   for (const base of BASE_CANDIDATES) {
-    const { json, setCookie } = await post(base, "/login", {
-      account: username,
-      password: hashPassword(password),
-      validateCode: "",
-      is_local: "true",
-    });
-    if (json.result === 1) {
-      const cookie = setCookie.map((c) => c.split(";")[0]).join("; ");
+    try {
+      const { json, setCookie } = await post(base, "/login", {
+        account: username,
+        password: hashPassword(password),
+        validateCode: "",
+        is_local: "true",
+      });
+      if (json.result === 1) {
+        const cookie = setCookie.map((c) => c.split(";")[0]).join("; ");
 
-      const plants = await post(base, "/index/getPlantListTitle", {}, cookie);
-      const plantId = plants.json?.[0]?.id ?? plants.json?.[0]?.plantId;
-      if (!plantId) throw new Error(`no Growatt plant found on this account (${base})`);
+        const plants = await post(base, "/index/getPlantListTitle", {}, cookie);
+        const plantId = plants.json?.[0]?.id ?? plants.json?.[0]?.plantId;
+        if (!plantId) throw new Error(`no Growatt plant found on this account (${base})`);
 
-      const devices = await post(base, "/panel/getDevicesByPlantList", { plantId, currPage: 1 }, cookie);
-      const mixSn = devices.json?.datas?.[0]?.deviceSn ?? devices.json?.obj?.datas?.[0]?.deviceSn;
-      if (!mixSn) throw new Error(`no device found on this Growatt plant (${base})`);
+        const devices = await post(base, "/panel/getDevicesByPlantList", { plantId, currPage: 1 }, cookie);
+        const mixSn = devices.json?.datas?.[0]?.deviceSn ?? devices.json?.obj?.datas?.[0]?.deviceSn;
+        if (!mixSn) throw new Error(`no device found on this Growatt plant (${base})`);
 
-      session = { base, cookie, plantId, mixSn };
-      return session;
+        session = { base, cookie, plantId, mixSn };
+        return session;
+      }
+      attempts.push(`${base}: ${JSON.stringify(json)}`);
+    } catch (err) {
+      attempts.push(`${base}: ${err}`);
     }
-    attempts.push(`${base}: ${JSON.stringify(json)}`);
   }
 
   const masked = username ? `${username[0]}***${username.slice(-1)} (len ${username.length})` : "(empty)";
