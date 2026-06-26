@@ -4,23 +4,23 @@ import Icon from "../Icon.jsx";
 
 export default function SolarPage() {
   const [data, setData] = useState(null);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const load = () =>
       fetchGrowatt()
         .then((d) => {
           setData(d);
-          setError(false);
+          setError(null);
         })
-        .catch(() => setError(true));
+        .catch((err) => setError(err.message));
     load();
     const t = setInterval(load, 15 * 1000);
     return () => clearInterval(t);
   }, []);
 
   if (error) {
-    return <p className="empty-state">Inverter non raggiungibile (ShineMaster 192.168.1.120)</p>;
+    return <p className="empty-state">Inverter non raggiungibile — {error}</p>;
   }
   if (!data) {
     return <p className="empty-state">Lettura dati in corso…</p>;

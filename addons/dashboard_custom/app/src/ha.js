@@ -22,8 +22,9 @@ export async function fetchWeather() {
 
 export async function fetchGrowatt() {
   const res = await fetch("api/growatt");
-  if (!res.ok) throw new Error(`growatt request failed: ${res.status}`);
-  return res.json();
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.message || `growatt request failed: ${res.status}`);
+  return body;
 }
 
 export function subscribeLiveUpdates(onEvent) {
