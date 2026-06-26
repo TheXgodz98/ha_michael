@@ -1,32 +1,33 @@
 :root {
-  --bg: #0a0c12;
-  --surface: rgba(255, 255, 255, 0.05);
-  --surface-strong: rgba(255, 255, 255, 0.08);
-  --surface-muted: rgba(255, 255, 255, 0.03);
-  --border: rgba(255, 255, 255, 0.08);
-  --text: #eef0f6;
-  --text-muted: #8b91a5;
-  --accent: #ff9d4d;
-  --accent-2: #ff5fa2;
-  --accent-soft: rgba(255, 157, 77, 0.16);
-  --accent-contrast: #ffd9ad;
+  --bg: #050505;
+  --surface: rgba(255, 255, 255, 0.045);
+  --surface-strong: rgba(255, 255, 255, 0.07);
+  --surface-muted: rgba(255, 255, 255, 0.035);
+  --border: rgba(255, 255, 255, 0.07);
+  --text: #f5f6f8;
+  --text-muted: #84899a;
+  --accent: #4fa8ff;
+  --accent-2: #4fa8ff;
+  --accent-soft: rgba(79, 168, 255, 0.16);
+  --accent-contrast: #cfe6ff;
   --info: #4fd1ff;
   --cold: #4fd1ff;
   --hot: #ff7a59;
-  --radius: 20px;
+  --solar: #ffc233;
+  --radius: 24px;
 }
 
 @media (prefers-color-scheme: light) {
   :root {
-    --bg: #f1f0eb;
+    --bg: #eeeeee;
     --surface: rgba(255, 255, 255, 0.85);
-    --surface-strong: rgba(255, 255, 255, 0.95);
+    --surface-strong: rgba(255, 255, 255, 0.96);
     --surface-muted: rgba(0, 0, 0, 0.035);
-    --border: rgba(0, 0, 0, 0.06);
-    --text: #1c1b18;
-    --text-muted: #80796b;
-    --accent-soft: #fbe0c4;
-    --accent-contrast: #8a4b06;
+    --border: rgba(0, 0, 0, 0.07);
+    --text: #15161a;
+    --text-muted: #6c7180;
+    --accent-soft: #dceaff;
+    --accent-contrast: #0b5bb8;
   }
 }
 
@@ -53,18 +54,14 @@ body {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background:
-    radial-gradient(480px circle at 12% 8%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 60%),
-    radial-gradient(420px circle at 90% 18%, color-mix(in srgb, var(--accent-2) 16%, transparent), transparent 60%),
-    radial-gradient(520px circle at 25% 95%, color-mix(in srgb, var(--cold) 14%, transparent), transparent 60%);
-  opacity: 0.7;
+  background: radial-gradient(620px circle at 50% -10%, rgba(255, 255, 255, 0.06), transparent 60%);
+  opacity: 1;
 }
 
 .glass {
-  background: linear-gradient(160deg, var(--surface-strong), var(--surface));
+  background: var(--surface-strong);
   border: 1px solid var(--border);
   backdrop-filter: blur(18px);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.45);
 }
 
 main {
@@ -147,13 +144,12 @@ main {
   }
 
   .side-nav-title {
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     padding: 0 0.75rem 1.5rem;
-    background: linear-gradient(90deg, var(--accent), var(--accent-2));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: var(--text);
   }
 
   .nav-item {
@@ -194,12 +190,11 @@ main {
 }
 
 .hero h1 {
-  font-size: 2rem;
-  font-weight: 600;
+  font-size: 2.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   margin: 0.25rem 0 0.15rem;
-  background: linear-gradient(90deg, var(--text), var(--text-muted));
-  -webkit-background-clip: text;
-  background-clip: text;
+  color: var(--text);
 }
 
 .hero-sub {
@@ -229,7 +224,7 @@ main {
 }
 
 .room-card {
-  background: linear-gradient(160deg, var(--surface-strong), var(--surface));
+  background: var(--surface-strong);
   border: 1px solid var(--border);
   backdrop-filter: blur(18px);
   border-radius: var(--radius);
@@ -238,8 +233,7 @@ main {
 }
 
 .room-active {
-  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
-  box-shadow: 0 0 24px -8px color-mix(in srgb, var(--accent) 55%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
 }
 
 .room-head {
@@ -270,8 +264,8 @@ main {
 }
 
 .room-active .room-icon-wrap {
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: #1a1206;
+  background: var(--accent);
+  color: #04101f;
 }
 
 .room-info {
@@ -446,7 +440,7 @@ main {
 }
 
 .thermo-card {
-  background: linear-gradient(160deg, var(--surface-strong), var(--surface));
+  background: var(--surface-strong);
   border: 1px solid var(--border);
   backdrop-filter: blur(18px);
   border-radius: var(--radius);
@@ -498,7 +492,7 @@ main {
 
 .thermo-current {
   font-size: 1.7rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .thermo-action {
@@ -603,7 +597,7 @@ main {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background: linear-gradient(160deg, var(--surface-strong), var(--surface));
+  background: var(--surface-strong);
   border: 1px solid var(--border);
   backdrop-filter: blur(14px);
   border-radius: 14px;
@@ -620,7 +614,7 @@ main {
 
 .weather-temp {
   font-size: 1.7rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text);
 }
 
@@ -701,7 +695,7 @@ main {
 }
 
 .stat-card {
-  background: linear-gradient(160deg, var(--surface-strong), var(--surface));
+  background: var(--surface-strong);
   border: 1px solid var(--border);
   backdrop-filter: blur(18px);
   border-radius: var(--radius);
@@ -731,7 +725,7 @@ main {
 
 .stat-value {
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .stat-label {
@@ -917,7 +911,7 @@ main {
 }
 
 .panel {
-  background: linear-gradient(160deg, var(--surface-strong), var(--surface));
+  background: var(--surface-strong);
   border: 1px solid var(--border);
   backdrop-filter: blur(18px);
   border-radius: var(--radius);
