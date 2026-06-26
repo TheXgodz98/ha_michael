@@ -20,6 +20,12 @@ export async function fetchWeather() {
   return res.json();
 }
 
+export async function fetchGrowatt() {
+  const res = await fetch("api/growatt");
+  if (!res.ok) throw new Error(`growatt request failed: ${res.status}`);
+  return res.json();
+}
+
 export function subscribeLiveUpdates(onEvent) {
   const wsUrl = new URL("api/live", document.baseURI);
   wsUrl.protocol = wsUrl.protocol === "https:" ? "wss:" : "ws:";

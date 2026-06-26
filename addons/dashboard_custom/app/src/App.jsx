@@ -6,12 +6,14 @@ import OverviewPage from "./pages/OverviewPage.jsx";
 import RoomsPage from "./pages/RoomsPage.jsx";
 import ClimatePage from "./pages/ClimatePage.jsx";
 import HeatingPage from "./pages/HeatingPage.jsx";
+import SolarPage from "./pages/SolarPage.jsx";
 
 const PAGES = [
-  { id: "overview", label: "Home", icon: "sun" },
+  { id: "overview", label: "Home", icon: "grid" },
   { id: "rooms", label: "Stanze", icon: "home" },
   { id: "climate", label: "Clima", icon: "thermometer" },
   { id: "heating", label: "Centrale", icon: "loop" },
+  { id: "solar", label: "Solare", icon: "sun" },
 ];
 
 const SUBTITLES = {
@@ -19,6 +21,7 @@ const SUBTITLES = {
   rooms: null,
   climate: "Stato impianto climatico",
   heating: "PDC, mix giorno/notte, VMC, ricircolo",
+  solar: "Produzione fotovoltaica (Growatt)",
 };
 
 export default function App() {
@@ -99,6 +102,7 @@ export default function App() {
             {page === "rooms" && <RoomsPage byId={byId} />}
             {page === "climate" && <ClimatePage byId={byId} />}
             {page === "heating" && <HeatingPage byId={byId} />}
+            {page === "solar" && <SolarPage />}
           </motion.div>
         </AnimatePresence>
       </main>

@@ -6,6 +6,7 @@
   "main": "index.js",
   "dependencies": {
     "express": "^4.19.2",
+    "modbus-serial": "^8.0.17",
     "ws": "^8.18.0"
   }
 }

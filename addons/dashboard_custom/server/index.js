@@ -1,6 +1,7 @@
 import express from "express";
 import { WebSocket, WebSocketServer } from "ws";
 import { createServer } from "http";
+import { readGrowattSnapshot, invalidateGrowattConnection } from "./growatt.js";
 
 const PORT = process.env.PORT || 8099;
 const SUPERVISOR_TOKEN = process.env.SUPERVISOR_TOKEN;
@@ -30,6 +31,16 @@ app.get("/api/weather", async (req, res) => {
     res.json(data);
   } catch (err) {
     res.status(502).json({ error: "weather_unavailable" });
+  }
+});
+
+app.get("/api/growatt", async (req, res) => {
+  try {
+    const data = await readGrowattSnapshot();
+    res.json(data);
+  } catch (err) {
+    invalidateGrowattConnection();
+    res.status(502).json({ error: "growatt_unavailable", message: String(err) });
   }
 });
 

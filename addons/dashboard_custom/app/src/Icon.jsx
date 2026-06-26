@@ -35,6 +35,9 @@ const PATHS = {
   rain: "M7 16a4.5 4.5 0 0 1-1-8.9A5.5 5.5 0 0 1 16.5 6 4 4 0 0 1 17 14H7z M8 18v2 M12 18v2 M16 18v2",
   storm: "M7 14a4.5 4.5 0 0 1-1-8.9A5.5 5.5 0 0 1 16.5 4 4 4 0 0 1 17 12H7z M13 14l-3 5h4l-2 4",
   fog: "M5 10h14 M3 14h18 M5 18h14",
+  panel: "M3 8 5 4h14l2 4z M3 8h18l-2 12H5z M3 8l9 4 9-4 M12 12v8 M7 8l-1.5 12 M17 8l1.5 12",
+  arrowRight: "M5 12h14 M13 6l6 6-6 6",
+  grid: "M4 4h7v7H4z M13 4h7v7h-7z M4 13h7v7H4z M13 13h7v7h-7z",
 };
 
 export default function Icon({ name, size = 20, className = "" }) {
