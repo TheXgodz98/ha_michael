@@ -1,7 +1,10 @@
 import { createHash } from "crypto";
 import { readFileSync } from "fs";
 
-const BASE = "https://server.growatt.com";
+// Growatt runs region-specific servers; an EU-registered account often
+// doesn't exist on the global/China default and login fails with a
+// generic "Username or Password Error" even with correct credentials.
+const BASE_CANDIDATES = ["https://server.growatt.com", "https://server-eu.growatt.com"];
 
 function loadCredentials() {
   try {
@@ -28,10 +31,10 @@ function hashPassword(value) {
   return out;
 }
 
-let session = null; // { cookie, plantId, mixSn }
+let session = null; // { base, cookie, plantId, mixSn }
 
-async function post(path, body, cookie) {
-  const r = await fetch(`${BASE}${path}`, {
+async function post(base, path, body, cookie) {
+  const r = await fetch(`${base}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -53,30 +56,36 @@ async function login() {
   if (!username || !password) {
     throw new Error("growatt cloud credentials not configured");
   }
-  const { json, setCookie } = await post("/login", {
-    account: username,
-    password: hashPassword(password),
-    validateCode: "",
-    is_local: "true",
-  });
-  if (json.result !== 1) {
-    const masked = username ? `${username[0]}***${username.slice(-1)} (len ${username.length})` : "(empty)";
-    throw new Error(
-      `growatt cloud login failed: ${JSON.stringify(json)} - using account ${masked}, password length ${password.length}`
-    );
+
+  const attempts = [];
+  for (const base of BASE_CANDIDATES) {
+    const { json, setCookie } = await post(base, "/login", {
+      account: username,
+      password: hashPassword(password),
+      validateCode: "",
+      is_local: "true",
+    });
+    if (json.result === 1) {
+      const cookie = setCookie.map((c) => c.split(";")[0]).join("; ");
+
+      const plants = await post(base, "/index/getPlantListTitle", {}, cookie);
+      const plantId = plants.json?.[0]?.id ?? plants.json?.[0]?.plantId;
+      if (!plantId) throw new Error(`no Growatt plant found on this account (${base})`);
+
+      const devices = await post(base, "/panel/getDevicesByPlantList", { plantId, currPage: 1 }, cookie);
+      const mixSn = devices.json?.datas?.[0]?.deviceSn ?? devices.json?.obj?.datas?.[0]?.deviceSn;
+      if (!mixSn) throw new Error(`no device found on this Growatt plant (${base})`);
+
+      session = { base, cookie, plantId, mixSn };
+      return session;
+    }
+    attempts.push(`${base}: ${JSON.stringify(json)}`);
   }
-  const cookie = setCookie.map((c) => c.split(";")[0]).join("; ");
 
-  const plants = await post("/index/getPlantListTitle", {}, cookie);
-  const plantId = plants.json?.[0]?.id ?? plants.json?.[0]?.plantId;
-  if (!plantId) throw new Error("no Growatt plant found on this account");
-
-  const devices = await post("/panel/getDevicesByPlantList", { plantId, currPage: 1 }, cookie);
-  const mixSn = devices.json?.datas?.[0]?.deviceSn ?? devices.json?.obj?.datas?.[0]?.deviceSn;
-  if (!mixSn) throw new Error("no device found on this Growatt plant");
-
-  session = { cookie, plantId, mixSn };
-  return session;
+  const masked = username ? `${username[0]}***${username.slice(-1)} (len ${username.length})` : "(empty)";
+  throw new Error(
+    `growatt cloud login failed on all servers [${attempts.join(" | ")}] - using account ${masked}, password length ${password.length}`
+  );
 }
 
 async function getSession() {
@@ -85,17 +94,17 @@ async function getSession() {
 }
 
 export async function readGrowattCloudSnapshot() {
-  let { cookie, plantId, mixSn } = await getSession();
+  let { base, cookie, plantId, mixSn } = await getSession();
 
-  let status = await post("/panel/mix/getMIXStatusData", { mixSn }, cookie);
-  let total = await post("/panel/mix/getMIXTotalData", { mixSn, plantId }, cookie);
+  let status = await post(base, "/panel/mix/getMIXStatusData", { mixSn }, cookie);
+  let total = await post(base, "/panel/mix/getMIXTotalData", { mixSn, plantId }, cookie);
 
   if (status.json?.result === 0 || total.json?.result === 0) {
     // session likely expired, log in again once
     session = null;
-    ({ cookie, plantId, mixSn } = await getSession());
-    status = await post("/panel/mix/getMIXStatusData", { mixSn }, cookie);
-    total = await post("/panel/mix/getMIXTotalData", { mixSn, plantId }, cookie);
+    ({ base, cookie, plantId, mixSn } = await getSession());
+    status = await post(base, "/panel/mix/getMIXStatusData", { mixSn }, cookie);
+    total = await post(base, "/panel/mix/getMIXTotalData", { mixSn, plantId }, cookie);
   }
 
   const s = status.json?.obj ?? status.json ?? {};
