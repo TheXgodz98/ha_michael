@@ -1,7 +1,6 @@
 import express from "express";
 import { WebSocket, WebSocketServer } from "ws";
 import { createServer } from "http";
-import { readGrowattSnapshot, invalidateGrowattConnection } from "./growatt.js";
 import { readGrowattCloudSnapshot, invalidateGrowattCloudSession } from "./growattCloud.js";
 
 const PORT = process.env.PORT || 8099;
@@ -37,21 +36,14 @@ app.get("/api/weather", async (req, res) => {
 
 app.get("/api/growatt", async (req, res) => {
   try {
-    const data = await readGrowattSnapshot();
-    res.json({ ...data, source: "modbus" });
-    return;
-  } catch (modbusErr) {
-    invalidateGrowattConnection();
-    try {
-      const data = await readGrowattCloudSnapshot();
-      res.json(data);
-    } catch (cloudErr) {
-      invalidateGrowattCloudSession();
-      res.status(502).json({
-        error: "growatt_unavailable",
-        message: `modbus: ${modbusErr}; cloud: ${cloudErr}`,
-      });
-    }
+    const data = await readGrowattCloudSnapshot();
+    res.json(data);
+  } catch (cloudErr) {
+    invalidateGrowattCloudSession();
+    res.status(502).json({
+      error: "growatt_unavailable",
+      message: `cloud: ${cloudErr}`,
+    });
   }
 });
 
