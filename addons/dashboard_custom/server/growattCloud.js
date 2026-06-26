@@ -6,7 +6,10 @@ const BASE = "https://server.growatt.com";
 function loadCredentials() {
   try {
     const opts = JSON.parse(readFileSync("/data/options.json", "utf-8"));
-    return { username: opts.growatt_username || "", password: opts.growatt_password || "" };
+    return {
+      username: (opts.growatt_username || "").trim(),
+      password: (opts.growatt_password || "").trim(),
+    };
   } catch {
     return { username: "", password: "" };
   }
@@ -32,6 +35,7 @@ async function post(path, body, cookie) {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
       ...(cookie ? { Cookie: cookie } : {}),
     },
     body: new URLSearchParams(body),
@@ -56,7 +60,10 @@ async function login() {
     is_local: "true",
   });
   if (json.result !== 1) {
-    throw new Error(`growatt cloud login failed: ${JSON.stringify(json)}`);
+    const masked = username ? `${username[0]}***${username.slice(-1)} (len ${username.length})` : "(empty)";
+    throw new Error(
+      `growatt cloud login failed: ${JSON.stringify(json)} - using account ${masked}, password length ${password.length}`
+    );
   }
   const cookie = setCookie.map((c) => c.split(";")[0]).join("; ");
 
