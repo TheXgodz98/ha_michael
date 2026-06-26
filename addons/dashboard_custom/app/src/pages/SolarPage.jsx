@@ -149,9 +149,9 @@ export default function SolarPage() {
       </div>
 
       <p className="solar-note">
-        {data.source === "cloud" ? (
-          <>Dati dal cloud Growatt (Modbus locale non raggiungibile) — fallback automatico attivo.</>
-        ) : (
+        {data.source === "openapi" && <>Dati da Growatt OpenAPI ufficiale (token) — campi da calibrare.</>}
+        {data.source === "cloud" && <>Dati dal cloud Growatt (scraping) — fallback dall'OpenAPI.</>}
+        {!data.source && (
           <>
             Lettura via Modbus TCP da {data.host} (unit id {data.unitId}, entrambi auto-rilevati) — mappa
             registri SPH hybrid non ancora verificata sul tuo modello reale. Stato inverter: {data.status},

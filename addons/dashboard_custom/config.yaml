@@ -1,5 +1,5 @@
 name: "Dashboard Custom"
-version: "0.15.1"
+version: "0.16.0"
 slug: "dashboard_custom"
 description: "Webapp custom per il controllo casa (luci, tapparelle, ecc.), indipendente dal ciclo di aggiornamento di HAOS"
 arch:
@@ -22,8 +22,10 @@ options:
   growatt_port: 502
   growatt_username: ""
   growatt_password: ""
+  growatt_api_token: ""
 schema:
   growatt_hosts: ["str"]
   growatt_port: "port"
   growatt_username: "str?"
   growatt_password: "password?"
+  growatt_api_token: "password?"
